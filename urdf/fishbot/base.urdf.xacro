@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="four_wheel_robot_base">
+
+    <!-- 属性定义 Properties -->
+    <xacro:property name="chassis_length" value="0.6" />
+    <xacro:property name="chassis_width" value="0.4" />
+    <xacro:property name="chassis_height" value="0.1" />
+    <xacro:property name="chassis_mass" value="10.0" />
+    
+    <xacro:property name="wheel_radius" value="0.08" />
+    <xacro:property name="wheel_length" value="0.06" />
+    <xacro:property name="wheel_mass" value="1.0" />
+    <xacro:property name="wheel_offset_x" value="0.2" />
+    <xacro:property name="wheel_offset_y" value="0.23" />
+
+    <!-- 材料定义 Materials -->
+    <material name="chassis_material">
+        <color rgba="0.2 0.2 0.8 1.0"/>
+    </material>
+    
+    <material name="wheel_material">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+    </material>
+
+    <!-- 惯性矩阵计算宏 Inertial Macro -->
+    <xacro:macro name="box_inertial" params="mass x y z">
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <mass value="${mass}"/>
+            <inertia ixx="${mass*(y*y+z*z)/12}" ixy="0" ixz="0"
+                     iyy="${mass*(x*x+z*z)/12}" iyz="0"
+                     izz="${mass*(x*x+y*y)/12}"/>
+        </inertial>
+    </xacro:macro>
+
+    <xacro:macro name="cylinder_inertial" params="mass radius height">
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <mass value="${mass}"/>
+            <inertia ixx="${mass*(3*radius*radius+height*height)/12}" ixy="0" ixz="0"
+                     iyy="${mass*(3*radius*radius+height*height)/12}" iyz="0"
+                     izz="${mass*radius*radius/2}"/>
+        </inertial>
+    </xacro:macro>
+
+    <!-- 虚拟的base_footprint链接 - 位于地面上 -->
+    <link name="base_footprint">
+        <!-- 这是一个虚拟链接，没有视觉或碰撞属性 -->
+    </link>
+
+    <!-- 机器人底盘 Base Link -->
+    <link name="base_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+            </geometry>
+            <material name="chassis_material"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+            </geometry>
+        </collision>
+        <xacro:box_inertial mass="${chassis_mass}" 
+                           x="${chassis_length}" 
+                           y="${chassis_width}" 
+                           z="${chassis_height}"/>
+    </link>
+
+    <!-- base_footprint到base_link的关节 -->
+    <joint name="base_footprint_joint" type="fixed">
+        <parent link="base_footprint"/>
+        <child link="base_link"/>
+        <origin xyz="0 0 ${wheel_radius + chassis_height/2}" rpy="0 0 0"/>
+    </joint>
+
+    <!-- 车轮宏定义 Wheel Macro -->
+    <xacro:macro name="wheel" params="prefix x_pos y_pos">
+        <link name="${prefix}_wheel">
+            <visual>
+                <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+                <geometry>
+                    <cylinder radius="${wheel_radius}" length="${wheel_length}"/>
+                </geometry>
+                <material name="wheel_material"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+                <geometry>
+                    <cylinder radius="${wheel_radius}" length="${wheel_length}"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+                <mass value="${wheel_mass}"/>
+                <inertia ixx="0.003" ixy="0" ixz="0" 
+                         iyy="0.003" iyz="0" izz="0.005"/>
+            </inertial>
+        </link>
+
+        <joint name="${prefix}_wheel_joint" type="continuous">
+            <parent link="base_link"/>
+            <child link="${prefix}_wheel"/>
+            <origin xyz="${x_pos} ${y_pos} ${-chassis_height/2}" rpy="0 0 0"/>
+            <axis xyz="0 1 0"/>
+            <dynamics damping="0.1" friction="0.1"/>
+        </joint>
+    </xacro:macro>
+
+    <!-- 使用宏创建四个车轮 Instantiate four wheels using macro -->
+    <xacro:wheel prefix="front_left"  x_pos="${wheel_offset_x}"  y_pos="${wheel_offset_y}"/>
+    <xacro:wheel prefix="front_right" x_pos="${wheel_offset_x}"  y_pos="${-wheel_offset_y}"/>
+    <xacro:wheel prefix="rear_left"   x_pos="${-wheel_offset_x}" y_pos="${wheel_offset_y}"/>
+    <xacro:wheel prefix="rear_right"  x_pos="${-wheel_offset_x}" y_pos="${-wheel_offset_y}"/>
+
+</robot>

@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="four_wheel_robot_imu">
+
+    <!-- IMU属性 IMU Properties -->
+    <xacro:property name="imu_length" value="0.04" />
+    <xacro:property name="imu_width" value="0.03" />
+    <xacro:property name="imu_height" value="0.01" />
+    <xacro:property name="imu_mass" value="0.1" />
+    <xacro:property name="chassis_height" value="0.1" />
+    <xacro:property name="chassis_length" value="0.6" />
+    
+    <!-- IMU材料 IMU Material -->
+    <material name="imu_material">
+        <color rgba="0.8 0.8 0.2 1.0"/>
+    </material>
+
+    <!-- IMU宏定义 IMU Macro -->
+    <xacro:macro name="imu_sensor" params="parent">
+        <link name="imu_link">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <box size="${imu_length} ${imu_width} ${imu_height}"/>
+                </geometry>
+                <material name="imu_material"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <box size="${imu_length} ${imu_width} ${imu_height}"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <mass value="${imu_mass}"/>
+                <inertia ixx="${imu_mass*(imu_width*imu_width+imu_height*imu_height)/12}" ixy="0" ixz="0"
+                         iyy="${imu_mass*(imu_length*imu_length+imu_height*imu_height)/12}" iyz="0"
+                         izz="${imu_mass*(imu_length*imu_length+imu_width*imu_width)/12}"/>
+            </inertial>
+        </link>
+
+        <!-- IMU关节 IMU Joint - 位于车子后方上方 -->
+        <joint name="imu_joint" type="fixed">
+            <parent link="${parent}"/>
+            <child link="imu_link"/>
+            <!-- 修正：相对于base_link中心，向上偏移半个chassis高度和半个imu高度 -->
+            <origin xyz="${-chassis_length/2 + imu_length/2 + 0.05} 0 ${chassis_height/2 + imu_height/2 + 0.01}" rpy="0 0 0"/>
+        </joint>
+
+        <!-- Gazebo IMU插件 -->
+        <gazebo reference="imu_link">
+            <gravity>true</gravity>
+            <sensor name="imu_sensor" type="imu">
+                <always_on>true</always_on>
+                <update_rate>100</update_rate>
+                <visualize>true</visualize>
+                <topic>__default_topic__</topic>
+                <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+                    <ros>
+                        <namespace>/robot</namespace>
+                        <argument>~/out:=imu</argument>
+                    </ros>
+                    <initial_orientation_as_reference>false</initial_orientation_as_reference>
+                </plugin>
+                <pose>0 0 0 0 0 0</pose>
+            </sensor>
+        </gazebo>
+    </xacro:macro>
+
+</robot>
