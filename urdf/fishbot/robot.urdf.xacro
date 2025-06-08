@@ -12,27 +12,18 @@
     <xacro:camera_sensor parent="base_link"/>
     <xacro:imu_sensor parent="base_link"/>
 
-    <!-- Gazebo 四轮滑移转向控制插件 -->
+    <!-- Gazebo 差速驱动控制插件（只使用后轮驱动） -->
     <gazebo>
-        <plugin name="skid_steer_drive_controller" filename="libgazebo_ros_diff_drive.so">
+        <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
             <ros>
                 <namespace>/robot</namespace>
-                <remapping>cmd_vel:=cmd_vel</remapping>
-                <remapping>odom:=odom</remapping>
             </ros>
             
             <!-- 更新率 -->
-            <update_rate>100.0</update_rate>
+            <update_rate>100</update_rate>
             
-            <!-- 轮子数量 -->
-            <num_wheel_pairs>2</num_wheel_pairs>
-            
-            <!-- 左侧轮子 -->
-            <left_joint>front_left_wheel_joint</left_joint>
+            <!-- 只使用后轮作为驱动轮 -->
             <left_joint>rear_left_wheel_joint</left_joint>
-            
-            <!-- 右侧轮子 -->
-            <right_joint>front_right_wheel_joint</right_joint>
             <right_joint>rear_right_wheel_joint</right_joint>
             
             <!-- 运动学参数 -->
@@ -52,15 +43,9 @@
             <odometry_frame>odom</odometry_frame>
             <robot_base_frame>base_link</robot_base_frame>
             
-            <!-- 启用速度命令的时间戳检查 -->
+            <!-- 话题配置 -->
             <command_topic>cmd_vel</command_topic>
-            
-            <!-- 速度和加速度限制 -->
-            <max_velocity>1.0</max_velocity>
-            <max_acceleration>2.5</max_acceleration>
-            
-            <!-- 发布速率 -->
-            <publish_rate>50.0</publish_rate>
+            <odometry_topic>odom</odometry_topic>
         </plugin>
     </gazebo>
 

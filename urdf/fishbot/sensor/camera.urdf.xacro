@@ -81,8 +81,9 @@
                 <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
                     <ros>
                         <namespace>/robot</namespace>
-                        <argument>~/image_raw:=image_raw</argument>
-                        <argument>~/camera_info:=camera_info</argument>
+                        <!-- 使用新的remap语法 -->
+                        <remapping>~/image_raw:=/robot/camera/image_raw</remapping>
+                        <remapping>~/camera_info:=/robot/camera/camera_info</remapping>
                     </ros>
                     <camera_name>camera</camera_name>
                     <frame_name>camera_optical_link</frame_name>
