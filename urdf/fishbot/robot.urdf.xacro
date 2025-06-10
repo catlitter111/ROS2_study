@@ -6,48 +6,12 @@
     <xacro:include filename="$(find fishbot_description)/urdf/fishbot/sensor/laser.urdf.xacro"/>
     <xacro:include filename="$(find fishbot_description)/urdf/fishbot/sensor/camera.urdf.xacro"/>
     <xacro:include filename="$(find fishbot_description)/urdf/fishbot/sensor/imu.urdf.xacro"/>
+    <xacro:include filename="$(find fishbot_description)/urdf/fishbot/ros2_control.urdf.xacro"/>
 
     <!-- 实例化所有传感器 Instantiate all sensors -->
     <xacro:lidar_sensor parent="base_link"/>
     <xacro:camera_sensor parent="base_link"/>
     <xacro:imu_sensor parent="base_link"/>
-
-    <!-- Gazebo 差速驱动控制插件（只使用后轮驱动） -->
-    <gazebo>
-        <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
-            <ros>
-                <namespace>/robot</namespace>
-            </ros>
-            
-            <!-- 更新率 -->
-            <update_rate>100</update_rate>
-            
-            <!-- 只使用后轮作为驱动轮 -->
-            <left_joint>rear_left_wheel_joint</left_joint>
-            <right_joint>rear_right_wheel_joint</right_joint>
-            
-            <!-- 运动学参数 -->
-            <wheel_separation>0.46</wheel_separation>
-            <wheel_diameter>0.16</wheel_diameter>
-            
-            <!-- 物理参数 -->
-            <max_wheel_torque>20</max_wheel_torque>
-            <max_wheel_acceleration>1.0</max_wheel_acceleration>
-            
-            <!-- 里程计配置 -->
-            <publish_odom>true</publish_odom>
-            <publish_odom_tf>true</publish_odom_tf>
-            <publish_wheel_tf>false</publish_wheel_tf>
-            
-            <!-- 坐标系配置 -->
-            <odometry_frame>odom</odometry_frame>
-            <robot_base_frame>base_link</robot_base_frame>
-            
-            <!-- 话题配置 -->
-            <command_topic>cmd_vel</command_topic>
-            <odometry_topic>odom</odometry_topic>
-        </plugin>
-    </gazebo>
 
     <!-- Gazebo 材料属性 -->
     <gazebo reference="base_link">
